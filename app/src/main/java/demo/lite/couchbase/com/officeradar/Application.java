@@ -88,6 +88,10 @@ public class Application extends android.app.Application {
 
     }
 
+    public Database getDatabase() {
+        return this.database;
+    }
+
 
 
 }
