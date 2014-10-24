@@ -47,6 +47,7 @@ public class MainActivity extends Activity {
     private void initMainListView() {
 
         Query query = getLastSeenUsers();
+        query.setDescending(true);
 
         try {
             QueryEnumerator enumerator = query.run();
@@ -61,7 +62,7 @@ public class MainActivity extends Activity {
         }
 
 
-        lastSeenUsersListAdapter = new LastSeenUsersListAdapter(this, query.toLiveQuery());
+        lastSeenUsersListAdapter = new LastSeenUsersListAdapter(this, query.toLiveQuery(), getDatabase());
 
         ListView listView = (ListView) findViewById(R.id.mainListView);
 
