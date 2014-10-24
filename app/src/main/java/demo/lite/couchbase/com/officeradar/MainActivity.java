@@ -11,10 +11,14 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.util.Log;
 
 import demo.lite.couchbase.com.officeradar.document.GeofenceEvent;
 
@@ -36,6 +40,20 @@ public class MainActivity extends Activity {
     private void initMainListView() {
 
         Query query = GeofenceEvent.getQuery(getDatabase());
+        query.setGroupLevel(1);
+
+        try {
+            QueryEnumerator enumerator = query.run();
+            while (enumerator.hasNext()) {
+                QueryRow row = enumerator.next();
+                Log.d(Application.TAG, "row: %s", row);
+            }
+
+
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
+
 
         geofenceListAdapter = new GeofenceListAdapter(this, query.toLiveQuery());
 
@@ -84,10 +102,13 @@ public class MainActivity extends Activity {
                 convertView = inflater.inflate(R.layout.view_office, null);
             }
 
-            final Document doc = (Document) getItem(position);
+            Object key = getKey0(position);
+            Object value = getValue(position);
+
+            // final Document doc = (Document) getItem(position);
 
             TextView text = (TextView) convertView.findViewById(R.id.text);
-            text.setText((String) doc.getProperty("_id"));
+            text.setText(key + " - " + value);
 
             return convertView;
         }

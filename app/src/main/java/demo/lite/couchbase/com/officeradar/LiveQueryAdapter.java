@@ -9,6 +9,8 @@ import android.widget.BaseAdapter;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.QueryEnumerator;
 
+import java.util.List;
+
 public class LiveQueryAdapter extends BaseAdapter {
 
     private LiveQuery query;
@@ -45,6 +47,28 @@ public class LiveQueryAdapter extends BaseAdapter {
     public Object getItem(int i) {
         return enumerator != null ? enumerator.getRow(i).getDocument() : null;
     }
+
+    public Object getKey0(int i) {
+
+        if (enumerator == null) {
+            return null;
+        }
+
+        List key = (List) enumerator.getRow(i).getKey();
+        return key.get(0);
+
+    }
+
+    public Object getValue(int i) {
+
+        if (enumerator == null) {
+            return null;
+        }
+
+        return enumerator.getRow(i).getValue();
+
+    }
+
 
     @Override
     public long getItemId(int i) {

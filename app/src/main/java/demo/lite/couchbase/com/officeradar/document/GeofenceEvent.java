@@ -5,7 +5,11 @@ import com.couchbase.lite.Database;
 import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
+import com.couchbase.lite.Reducer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class GeofenceEvent {
@@ -20,11 +24,19 @@ public class GeofenceEvent {
                 @Override
                 public void map(Map<String, Object> document, Emitter emitter) {
                     if (DOC_TYPE.equals(document.get("type"))) {
-                        emitter.emit(document.get("_id"), null);
+                        List keyList = Arrays.asList(document.get("profile"), document.get("_id"));
+                        emitter.emit(keyList.toArray(), null);
                     }
                 }
             };
-            view.setMap(map, "1");
+            Reducer reducer = new Reducer() {
+                @Override
+                public Object reduce(List<Object> keys, List<Object> values, boolean rereduce) {
+                    return keys.size();
+                }
+            };
+
+            view.setMapReduce(map, reducer, "4");
         }
 
         Query query = view.createQuery();
