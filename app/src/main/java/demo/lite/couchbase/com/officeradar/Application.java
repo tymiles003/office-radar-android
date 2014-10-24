@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import demo.lite.couchbase.com.officeradar.misc.MigrationUtil;
+
 /**
  * Application Singleton
  */
@@ -34,6 +36,7 @@ public class Application extends android.app.Application {
 
         initDatabase();
         startReplications();
+        // MigrationUtil.addLatestEvents(database);
 
     }
 

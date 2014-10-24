@@ -62,14 +62,12 @@ public class MigrationUtil {
             @Override
             public void map(Map<String, Object> document, Emitter emitter) {
                 if (document.get("type") != null && document.get("type").equals("geofence_event")) {
-                    Object[] key = Arrays.asList(
-                            document.get("profile"),
-                            document.get("created_at")
-                    ).toArray();
-                    emitter.emit(new Object[] { document.get("profile"), document.get("created_at") }, null);
+                    Object valueToEmit = document.get("created_at");
+                    Object[] key = {document.get("profile"), document.get("created_at")};
+                    emitter.emit(key, valueToEmit);
                 }
             }
-        }, "4");
+        }, "5");
 
         Query query = eventsForProfile.createQuery();
         query.setDescending(true);
@@ -86,11 +84,10 @@ public class MigrationUtil {
 
         while (queryEnumerator.hasNext()) {
             QueryRow row = queryEnumerator.next();
-            Object key = row.getKey();
-            Object value = row.getValue();
-            Document doc = row.getDocument();
+
             Map<String, Object> properties = new HashMap<String, Object>(profileDoc.getProperties());
             properties.put("latestEvent", row.getDocumentId());
+            properties.put("latestEventCreatedAt", row.getValue());
             try {
                 profileDoc.putProperties(properties);
             } catch (CouchbaseLiteException e) {

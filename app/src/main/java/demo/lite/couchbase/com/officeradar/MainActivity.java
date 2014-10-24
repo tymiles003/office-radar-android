@@ -14,33 +14,39 @@ import android.widget.TextView;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
+import com.couchbase.lite.Emitter;
 import com.couchbase.lite.LiveQuery;
+import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.Reducer;
 import com.couchbase.lite.util.Log;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import demo.lite.couchbase.com.officeradar.document.GeofenceEvent;
 
 
 public class MainActivity extends Activity {
 
-    private GeofenceListAdapter geofenceListAdapter;
+    private LastSeenUsersListAdapter lastSeenUsersListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         initMainListView();
 
     }
 
     private void initMainListView() {
 
-        Query query = GeofenceEvent.getQuery(getDatabase());
-        query.setGroupLevel(1);
+        Query query = getLastSeenUsers();
 
         try {
             QueryEnumerator enumerator = query.run();
@@ -55,11 +61,11 @@ public class MainActivity extends Activity {
         }
 
 
-        geofenceListAdapter = new GeofenceListAdapter(this, query.toLiveQuery());
+        lastSeenUsersListAdapter = new LastSeenUsersListAdapter(this, query.toLiveQuery());
 
         ListView listView = (ListView) findViewById(R.id.mainListView);
 
-        listView.setAdapter(geofenceListAdapter);
+        listView.setAdapter(lastSeenUsersListAdapter);
     }
 
     private Database getDatabase() {
@@ -67,6 +73,31 @@ public class MainActivity extends Activity {
         return application.getDatabase();
     }
 
+    private Query getLastSeenUsers() {
+
+        com.couchbase.lite.View view = getDatabase().getView("lastSeenUsers");
+        if (view.getMap() == null) {
+            Mapper map = new Mapper() {
+                @Override
+                public void map(Map<String, Object> document, Emitter emitter) {
+                    if (document.get("type") != null && document.get("type").equals("profile")) {
+                        // this should be sorted descending by the last time
+                        // the user was seen, so use latestEventCreatedAt for the key
+                        Object key = document.get("latestEventCreatedAt");
+                        HashMap<String, Object> value = new HashMap<String, Object>();
+                        value.put("latestEventCreatedAt", document.get("latestEventCreatedAt"));
+                        value.put("name", document.get("name"));
+                        emitter.emit(key, value);
+                    }
+                }
+            };
+            view.setMap(map, "2");
+        }
+
+        Query query = view.createQuery();
+        return query;
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -87,32 +118,6 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class GeofenceListAdapter extends LiveQueryAdapter {
 
-        public GeofenceListAdapter(Context context, LiveQuery query) {
-            super(context, query);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-
-            if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater) parent.getContext().
-                        getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.view_office, null);
-            }
-
-            Object key = getKey0(position);
-            Object value = getValue(position);
-
-            // final Document doc = (Document) getItem(position);
-
-            TextView text = (TextView) convertView.findViewById(R.id.text);
-            text.setText(key + " - " + value);
-
-            return convertView;
-        }
-
-    }
 
 }
