@@ -11,10 +11,14 @@ import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.Revision;
 import com.couchbase.lite.View;
+import com.couchbase.lite.util.Log;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import demo.lite.couchbase.com.officeradar.Application;
+import demo.lite.couchbase.com.officeradar.document.GeofenceEvent;
 
 public class MigrationUtil {
 
@@ -96,6 +100,44 @@ public class MigrationUtil {
 
         }
 
+
+
+    }
+
+    /**
+     * For some reason, some profile objects are missing the "type" field.
+     * Fix them.
+     */
+    public static void fixupProfilesMissingTypeField(Database database) {
+
+        Map<String, String> uniqueProfileNames = new HashMap<String, String>();
+        Query query = GeofenceEvent.getQuery(database);
+        try {
+            QueryEnumerator queryEnumerator = query.run();
+            while (queryEnumerator.hasNext()) {
+                QueryRow row = queryEnumerator.next();
+                String profileId = (String) row.getValue();
+                Document profileDocument = database.getDocument(profileId);
+                if (profileDocument == null) {
+                    Log.d(Application.TAG, "profile doc not found for id: " + profileId);
+                }
+                String name = (String) profileDocument.getProperties().get("name");
+                if (!uniqueProfileNames.containsKey(name)) {
+                    uniqueProfileNames.put(name, profileId);
+                }
+
+                if (!profileDocument.getProperties().containsKey("type")) {
+                    Map<String, Object> properties = new HashMap<String, Object>(profileDocument.getProperties());
+                    properties.put("type", "profile");
+                    profileDocument.putProperties(properties);
+                }
+
+            }
+
+            Log.d(Application.TAG, uniqueProfileNames.toString());
+        } catch (CouchbaseLiteException e) {
+            throw new RuntimeException(e);
+        }
 
 
     }

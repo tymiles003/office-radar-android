@@ -36,7 +36,9 @@ public class Application extends android.app.Application {
 
         initDatabase();
         startReplications();
+
         // MigrationUtil.addLatestEvents(database);
+        // MigrationUtil.fixupProfilesMissingTypeField(database);
 
     }
 

@@ -25,18 +25,11 @@ public class GeofenceEvent {
                 public void map(Map<String, Object> document, Emitter emitter) {
                     if (DOC_TYPE.equals(document.get("type"))) {
                         List keyList = Arrays.asList(document.get("profile"), document.get("_id"));
-                        emitter.emit(keyList.toArray(), null);
+                        emitter.emit(keyList.toArray(), document.get("profile"));
                     }
                 }
             };
-            Reducer reducer = new Reducer() {
-                @Override
-                public Object reduce(List<Object> keys, List<Object> values, boolean rereduce) {
-                    return keys.size();
-                }
-            };
-
-            view.setMapReduce(map, reducer, "4");
+            view.setMap(map, "6");
         }
 
         Query query = view.createQuery();
