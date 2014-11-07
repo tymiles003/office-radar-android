@@ -15,6 +15,8 @@ import com.couchbase.lite.util.Log;
 
 import java.util.Map;
 
+import demo.lite.couchbase.com.officeradar.misc.Util;
+
 /**
  * The main radar screen that shows all users and when/where
  * they were last spotted.
@@ -39,6 +41,7 @@ public class LastSeenUsersListAdapter extends LiveQueryAdapter {
 
         Map<String, Object> value = (Map<String, Object>) getValue(position);
         String name = (String) value.get("name");
+        name = Util.truncateName(name, 15);
         String latestEventCreatedAt = (String) value.get("latestEventCreatedAt");
 
         ImageView profileImage = (ImageView) convertView.findViewById(R.id.image);
