@@ -31,8 +31,8 @@ public class GeofenceListAdapter extends LiveQueryAdapter {
 
         // final Document doc = (Document) getItem(position);
 
-        TextView text = (TextView) convertView.findViewById(R.id.text);
-        text.setText(key + " - " + value);
+       //  TextView text = (TextView) convertView.findViewById(R.id.text);
+        // text.setText(key + " - " + value);
 
         return convertView;
     }

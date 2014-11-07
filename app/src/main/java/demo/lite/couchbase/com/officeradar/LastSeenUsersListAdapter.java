@@ -42,8 +42,8 @@ public class LastSeenUsersListAdapter extends LiveQueryAdapter {
         String beaconLocation = getBeaconLocation(position);
 
 
-        TextView text = (TextView) convertView.findViewById(R.id.text);
-        text.setText(name + " - " + beaconLocation);
+        // TextView text = (TextView) convertView.findViewById(R.id.text);
+        // text.setText(name + " - " + beaconLocation);
 
         return convertView;
     }
