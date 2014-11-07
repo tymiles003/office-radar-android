@@ -5,6 +5,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.couchbase.lite.Database;
@@ -38,12 +39,21 @@ public class LastSeenUsersListAdapter extends LiveQueryAdapter {
 
         Map<String, Object> value = (Map<String, Object>) getValue(position);
         String name = (String) value.get("name");
+        String latestEventCreatedAt = (String) value.get("latestEventCreatedAt");
+
+        ImageView profileImage = (ImageView) convertView.findViewById(R.id.image);
+        profileImage.setImageResource(R.drawable.profile_placeholder);
 
         String beaconLocation = getBeaconLocation(position);
 
+        TextView textViewName = (TextView) convertView.findViewById(R.id.name);
+        textViewName.setText(name);
 
-        // TextView text = (TextView) convertView.findViewById(R.id.text);
-        // text.setText(name + " - " + beaconLocation);
+        TextView textViewEntryExit = (TextView) convertView.findViewById(R.id.entry_exit_time);
+        textViewEntryExit.setText(latestEventCreatedAt);
+
+        TextView textViewLastLocation = (TextView) convertView.findViewById(R.id.last_seen_location);
+        textViewLastLocation.setText(beaconLocation);
 
         return convertView;
     }
