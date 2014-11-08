@@ -12,7 +12,7 @@ public class Util {
             formatString = "%s ..";
         }
         return String.format(formatString, name.substring(0, Math.min(name.length(), maxchars)));
-        
+
     }
 
 }

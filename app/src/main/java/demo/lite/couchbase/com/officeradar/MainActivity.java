@@ -92,7 +92,7 @@ public class MainActivity extends Activity {
                     }
                 }
             };
-            view.setMap(map, "2");
+            view.setMap(map, "3");
         }
 
         Query query = view.createQuery();

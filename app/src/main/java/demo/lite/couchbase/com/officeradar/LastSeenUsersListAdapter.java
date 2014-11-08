@@ -13,8 +13,12 @@ import com.couchbase.lite.Document;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.util.Log;
 
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Map;
 
+import demo.lite.couchbase.com.officeradar.misc.ISO8601;
 import demo.lite.couchbase.com.officeradar.misc.Util;
 
 /**
@@ -42,7 +46,9 @@ public class LastSeenUsersListAdapter extends LiveQueryAdapter {
         Map<String, Object> value = (Map<String, Object>) getValue(position);
         String name = (String) value.get("name");
         name = Util.truncateName(name, 15);
+
         String latestEventCreatedAt = (String) value.get("latestEventCreatedAt");
+        String latestEventDescription = getLatestEventDescription(latestEventCreatedAt);
 
         ImageView profileImage = (ImageView) convertView.findViewById(R.id.image);
         profileImage.setImageResource(R.drawable.profile_placeholder);
@@ -53,12 +59,40 @@ public class LastSeenUsersListAdapter extends LiveQueryAdapter {
         textViewName.setText(name);
 
         TextView textViewEntryExit = (TextView) convertView.findViewById(R.id.entry_exit_time);
-        textViewEntryExit.setText(latestEventCreatedAt);
+        textViewEntryExit.setText(latestEventDescription);
 
         TextView textViewLastLocation = (TextView) convertView.findViewById(R.id.last_seen_location);
         textViewLastLocation.setText(beaconLocation);
 
         return convertView;
+    }
+
+    /**
+     * Given the ISO8601 encoded date (2014-10-24T20:09:19.233Z), get a string description of how long
+     * ago this was, eg "2 hours ago".
+     */
+    private String getLatestEventDescription(String latestEventCreatedAt) {
+        String latestEventDescription = latestEventCreatedAt;
+
+        try {
+            Calendar eventCal = ISO8601.toCalendar(latestEventCreatedAt);
+            eventCal.toString();
+            Calendar nowCal = new GregorianCalendar();
+
+            long secs = (nowCal.getTime().getTime() - eventCal.getTime().getTime()) / 1000;
+            long hours = secs / 3600;
+            long minutes = secs / 60;
+            latestEventDescription = String.format("Last seen %d hours ago", hours);
+
+            if (hours == 0) {
+                latestEventDescription = String.format("Last seen %d minutes ago", minutes);
+            }
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return latestEventDescription;
     }
 
     private String getBeaconLocation(int position) {
